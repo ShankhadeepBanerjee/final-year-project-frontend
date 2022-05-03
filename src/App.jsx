@@ -6,7 +6,19 @@ import Error from "./pages/Error";
 import Home from "./pages/Home";
 import VerifyCandidate from "./pages/VerifyCandidate";
 
+
+import { useEffect } from "react";
+import * as faceapi from "face-api.js" ;
+
 function App() {
+  useEffect(() => {
+    (async ()=> {
+      const net = new faceapi.SsdMobilenetv1()
+      await net.loadFromUri("./model");
+      console.log(faceapi.nets.tinyFaceDetector);
+    })()
+  }, [])
+  
   return (
     <Router>
       <Header />
