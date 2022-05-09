@@ -1,3 +1,17 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+
+@layer components {
+    /* Button */
+    .BaseButton {
+      @apply py-2 px-4 rounded-full font-semibold shadow-md border-current;
+      @apply hover:brightness-105 hover:shadow-lg hover:cursor-pointer;
+      @apply active:brightness-95 active:shadow-none;
+      @apply disabled:cursor-not-allowed disabled:shadow-none disabled:brightness-100 disabled:opacity-80;
+      @apply transition;
+    }
+  }
+  
