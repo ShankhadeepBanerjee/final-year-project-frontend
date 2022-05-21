@@ -11,7 +11,7 @@ import Webcam from "react-webcam";
 import { FcOldTimeCamera } from "react-icons/fc";
 import { AiFillFolderOpen } from "react-icons/ai";
 import { BsFillCameraFill } from "react-icons/bs";
-import { FaWindowClose } from "react-icons/fa";
+import { FaWindowClose, FaUpload } from "react-icons/fa";
 
 const colleges = ["Others", "ABC college", "DEF college", "GHI college"];
 
@@ -213,6 +213,12 @@ export default function AddCandidate() {
                 setCandidateImageSrc(imageURL);
               }}
             />
+            {candidateImageSrc && (
+              <span className="BaseButton inline-flex items-center gap-x-3 bg-green-500 text-white">
+                <FaUpload />
+                <p>Upload</p>
+              </span>
+            )}
             <span
               className="BaseButton inline-flex items-center gap-x-3"
               onClick={() => console.log(uploadRef.current.click())}
