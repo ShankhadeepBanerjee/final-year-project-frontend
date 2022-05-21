@@ -29,3 +29,7 @@ node_modules
 *.njsproj
 *.sln
 *.sw?
+
+
+# firebase files
+.firebase
