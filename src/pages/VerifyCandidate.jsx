@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import QrReader from "../utils/QrReader";
+import QrReader from "../components/QrReader";
 
 export default function VerifyCandidate() {
   const [candidateID, setCandidateID] = useState("");
