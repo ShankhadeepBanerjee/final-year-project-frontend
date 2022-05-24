@@ -53,7 +53,7 @@ export default function AddCandidate() {
   const handleModalClose = () => setShowModal(false);
 
   return (
-    <div className="container flex justify-center py-8 px-5">
+    <div className="container m-auto flex justify-center py-8 px-5">
       <form className="w-full max-w-lg" onSubmit={handleSubmit(submitForm)}>
         <div className="flex flex-wrap -mx-3 mb-6">
           <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
