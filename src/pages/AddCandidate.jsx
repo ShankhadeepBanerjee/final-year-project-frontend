@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 import Modal from "../components/Modal";
 
@@ -12,6 +12,8 @@ import { FcOldTimeCamera } from "react-icons/fc";
 import { AiFillFolderOpen } from "react-icons/ai";
 import { BsFillCameraFill } from "react-icons/bs";
 import { FaWindowClose, FaUpload } from "react-icons/fa";
+import { addCandidateInDB } from "../utils/firestore";
+import { storeCandidateImage } from "../utils/firebase-storage";
 
 const colleges = ["Others", "ABC college", "DEF college", "GHI college"];
 
@@ -27,13 +29,15 @@ const schema = yup.object().shape({
     .required("Registration Number is required please")
     .typeError("you must specify a number"),
   collegeName: yup.string().required("College Name is required please"),
-  candidateFacePicURL: yup
-    .string()
-    .required("Please Provide Picture of Your Face."),
+  // candidateFacePicURL: yup
+  //   .string()
+  //   .required("Please Provide Picture of Your Face."),
 });
 
+const candidateImageSrcInitialState = { url: "", file: null, type: "" };
 export default function AddCandidate() {
   const {
+    watch,
     register,
     handleSubmit,
     formState: { errors },
@@ -41,12 +45,20 @@ export default function AddCandidate() {
     resolver: yupResolver(schema),
   });
 
-  const submitForm = (data) => {
+  const submitForm = async (data) => {
+    data = {
+      ...data,
+      id: data.rollNumber,
+      candidateFacePicURL: candidateImageSrc.url,
+    };
     console.log(data);
+    addCandidateInDB(data);
   };
 
   const [showModal, setShowModal] = useState(false);
-  const [candidateImageSrc, setCandidateImageSrc] = useState("");
+  const [candidateImageSrc, setCandidateImageSrc] = useState(
+    candidateImageSrcInitialState
+  );
 
   const uploadRef = useRef(null);
 
@@ -159,28 +171,31 @@ export default function AddCandidate() {
           >
             Candidate Face Picture
           </label>
-          <input
+          {/* <input
             type="text"
             {...register("candidateFacePicURL")}
             className="hidden"
-            value={candidateImageSrc}
-          />
+            value={candidateImageSrc.url}
+          /> */}
 
-          <p className="text-red-500 text-xs italic">
-            {candidateImageSrc === "" && errors?.candidateFacePicURL?.message}
-          </p>
+          {/* <p className="text-red-500 text-xs italic">
+            {errors?.candidateFacePicURL &&
+              errors?.candidateFacePicURL?.message}
+          </p> */}
           <div className="shadow-xl relative">
-            {candidateImageSrc && (
+            {candidateImageSrc.url && (
               <FaWindowClose
                 className="absolute top-0 right-0 BaseButton p-0 rounded-[0]"
                 size={32}
                 color="#f15d"
-                onClick={() => setCandidateImageSrc("")}
+                onClick={() =>
+                  setCandidateImageSrc(candidateImageSrcInitialState)
+                }
               />
             )}
             <img
               className="rounded-md w-full h-full"
-              src={candidateImageSrc || "images/upload-placeholder.jpg"}
+              src={candidateImageSrc.url || "images/upload-placeholder.jpg"}
               alt=""
             />
           </div>
@@ -196,7 +211,11 @@ export default function AddCandidate() {
                     onClick={() => {
                       handleModalClose();
                       const imageSrc = getScreenshot();
-                      setCandidateImageSrc(imageSrc);
+                      setCandidateImageSrc({
+                        url: imageSrc,
+                        file: imageSrc,
+                        type: "data_url",
+                      });
                     }}
                   />
                 )}
@@ -209,19 +228,36 @@ export default function AddCandidate() {
               className="hidden"
               ref={uploadRef}
               onChange={(e) => {
-                const imageURL = URL.createObjectURL(e.target.files[0]);
-                setCandidateImageSrc(imageURL);
+                setCandidateImageSrc({
+                  url: URL.createObjectURL(e.target.files[0]),
+                  file: e.target.files[0],
+                  type: "file",
+                });
               }}
             />
-            {candidateImageSrc && (
-              <span className="BaseButton inline-flex items-center gap-x-3 bg-green-500 text-white">
+            {candidateImageSrc.url && (
+              <span
+                className="BaseButton inline-flex items-center gap-x-3 bg-green-500 text-white"
+                onClick={async () => {
+                  const res = await storeCandidateImage(
+                    candidateImageSrc.file,
+                    candidateImageSrc.type
+                  );
+                  setCandidateImageSrc((p) => {
+                    return {
+                      ...p,
+                      url: res,
+                    };
+                  });
+                }}
+              >
                 <FaUpload />
                 <p>Upload</p>
               </span>
             )}
             <span
               className="BaseButton inline-flex items-center gap-x-3"
-              onClick={() => console.log(uploadRef.current.click())}
+              onClick={() => uploadRef.current.click()}
             >
               <AiFillFolderOpen size={20} />
               <span>From Device</span>
