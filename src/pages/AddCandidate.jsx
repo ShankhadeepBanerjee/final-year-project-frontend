@@ -45,7 +45,7 @@ export default function AddCandidate() {
       setLoading(true);
       await addCandidateInDB(data);
       toast("Candidate was added successfully");
-      // navigate("/verify-candidate");
+      navigate(`/show-qr/${data.id}`);
     } catch (e) {
       toast(e.message);
     } finally {
@@ -170,7 +170,6 @@ export default function AddCandidate() {
           control={control}
           name="candidateImageURL"
           render={({ field: { value, onChange }, fieldState: { error } }) => {
-            console.log(error);
             return (
               <>
                 <label
