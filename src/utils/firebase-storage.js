@@ -15,7 +15,9 @@ export const storeCandidateImage = async (
   let res;
   if (type === "data_url") {
     res = await uploadString(spaceRef, candidateImage, type);
-  } else res = await uploadBytes(spaceRef, candidateImage);
+  } else {
+    res = await uploadBytes(spaceRef, candidateImage);
+  }
   const url = await getDownloadURL(res.ref);
   return url;
 };

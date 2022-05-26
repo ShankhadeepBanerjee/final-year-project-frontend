@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 
 import Modal from "../components/Modal";
 
@@ -14,6 +14,8 @@ import { BsFillCameraFill } from "react-icons/bs";
 import { FaWindowClose, FaUpload } from "react-icons/fa";
 import { addCandidateInDB } from "../utils/firestore";
 import { storeCandidateImage } from "../utils/firebase-storage";
+import { ToastContainer, toast } from "react-toastify";
+import { ImSpinner6 } from "react-icons/im";
 
 const colleges = ["Others", "ABC college", "DEF college", "GHI college"];
 
@@ -29,9 +31,6 @@ const schema = yup.object().shape({
     .required("Registration Number is required please")
     .typeError("you must specify a number"),
   collegeName: yup.string().required("College Name is required please"),
-  // candidateFacePicURL: yup
-  //   .string()
-  //   .required("Please Provide Picture of Your Face."),
 });
 
 const candidateImageSrcInitialState = { url: "", file: null, type: "" };
@@ -45,20 +44,54 @@ export default function AddCandidate() {
     resolver: yupResolver(schema),
   });
 
-  const submitForm = async (data) => {
+  const [showModal, setShowModal] = useState(false);
+  const [candidateImageSrc, setCandidateImageSrc] = useState(
+    candidateImageSrcInitialState
+  );
+  const [loading, setLoading] = useState(false);
+  const [picUploading, setPicUploading] = useState(false);
+
+  const handleAddCandidateToDb = useCallback(async (data) => {
+    try {
+      setLoading(true);
+      await addCandidateInDB(data);
+    } catch (e) {
+      toast(e.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const handleUploadCandidateImage = useCallback(async () => {
+    try {
+      setPicUploading(true);
+      const res = await storeCandidateImage(
+        candidateImageSrc.file,
+        candidateImageSrc.type
+      );
+      setCandidateImageSrc((p) => {
+        return {
+          ...p,
+          url: res,
+        };
+      });
+      toast("Successfully Uploaded Image");
+    } catch (e) {
+      toast(e.message);
+    } finally {
+      setPicUploading(false);
+    }
+  }, [candidateImageSrc]);
+
+  const submitForm = (data) => {
     data = {
       ...data,
       id: data.rollNumber,
       candidateFacePicURL: candidateImageSrc.url,
     };
     console.log(data);
-    addCandidateInDB(data);
+    handleAddCandidateToDb(data);
   };
-
-  const [showModal, setShowModal] = useState(false);
-  const [candidateImageSrc, setCandidateImageSrc] = useState(
-    candidateImageSrcInitialState
-  );
 
   const uploadRef = useRef(null);
 
@@ -66,6 +99,11 @@ export default function AddCandidate() {
 
   return (
     <div className="container m-auto flex justify-center py-8 px-5">
+      <ToastContainer />
+      {/* <img
+        src="https://firebasestorage.googleapis.com/v0/b/final-year-project-5ca9d.appspot.com/o/images%2Fabc.jpg?alt=media&token=1adeb031-9fe5-4304-b64f-222ec5d5bfc6"
+        alt=""
+      /> */}
       <form className="w-full max-w-lg" onSubmit={handleSubmit(submitForm)}>
         <div className="flex flex-wrap -mx-3 mb-6">
           <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
@@ -171,17 +209,6 @@ export default function AddCandidate() {
           >
             Candidate Face Picture
           </label>
-          {/* <input
-            type="text"
-            {...register("candidateFacePicURL")}
-            className="hidden"
-            value={candidateImageSrc.url}
-          /> */}
-
-          {/* <p className="text-red-500 text-xs italic">
-            {errors?.candidateFacePicURL &&
-              errors?.candidateFacePicURL?.message}
-          </p> */}
           <div className="shadow-xl relative">
             {candidateImageSrc.url && (
               <FaWindowClose
@@ -237,21 +264,16 @@ export default function AddCandidate() {
             />
             {candidateImageSrc.url && (
               <span
-                className="BaseButton inline-flex items-center gap-x-3 bg-green-500 text-white"
-                onClick={async () => {
-                  const res = await storeCandidateImage(
-                    candidateImageSrc.file,
-                    candidateImageSrc.type
-                  );
-                  setCandidateImageSrc((p) => {
-                    return {
-                      ...p,
-                      url: res,
-                    };
-                  });
-                }}
+                className={`BaseButton inline-flex items-center gap-x-3 bg-green-500 text-white ${
+                  picUploading && "pointer-events-none opacity-70"
+                }`}
+                onClick={handleUploadCandidateImage}
               >
-                <FaUpload />
+                {picUploading ? (
+                  <ImSpinner6 className="animate-spin" />
+                ) : (
+                  <FaUpload />
+                )}
                 <p>Upload</p>
               </span>
             )}
