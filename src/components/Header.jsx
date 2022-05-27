@@ -9,14 +9,17 @@ const routs = {
 export default function Header() {
   return (
     <div className="py-5 px-5 flex bg-gray-100">
-      <Link to="/" className="flex-1 text-lg text-blue-500 hover:text-blue-800">
+      <Link
+        to="/"
+        className="flex-1 text-blue-500 hover:text-blue-800 text-sm md:text-lg mr-2"
+      >
         Home
       </Link>
       {Object.keys(routs).map((item, idx) => (
         <Link
           key={idx}
           to={`/${item}`}
-          className="mr-5 text-blue-500 hover:text-blue-800 text-lg"
+          className="mr-5 text-blue-500 hover:text-blue-800 text-sm md:text-lg text-right md:text-left "
         >
           {routs[item]}
         </Link>
