@@ -41,7 +41,7 @@ export default function VerifyCandidate() {
           <h2>{candidateID && `Your Candidate ID is: ${candidateID}`}</h2>
           <QrReader
             interval={3000}
-            onDecodeValue={(val) => setCandidateID(val)}
+            onDecodeValue={(val) => setCandidateID(val.slice(1, -1))}
             style={{ padding: "1rem" }}
           />
         </>
@@ -54,8 +54,18 @@ export default function VerifyCandidate() {
       )}
       {candidateID && candidateData && (
         <div className="flex flex-col justify-center items-center gap-y-5">
-          <p className="text-lg font-bold">Show your Face in front of camera</p>
-          <Webcam />
+          <p className="text-lg font-bold">
+            Hi &nbsp;
+            <span className="text-blue-500 text-2xl">
+              {candidateData.firstName}
+            </span>
+            , Show your Face in front of camera
+          </p>
+
+          <div className="flex flex-wrap gap-x-5">
+            <Webcam />
+            <img src={candidateData.candidateImageURL} alt="" />
+          </div>
         </div>
       )}
     </div>
