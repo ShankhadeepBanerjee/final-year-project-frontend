@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 
 export default function ShowQr() {
   const { id } = useParams();
+
   return (
     <div className="flex flex-col items-center gap-y-5 bg-white w-full absolute top-0 left-0 h-screen">
       <div className="h-16 bg-slate-100 w-full py-3 px-5">

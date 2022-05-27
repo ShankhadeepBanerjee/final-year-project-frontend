@@ -43,9 +43,9 @@ export default function AddCandidate() {
   const handleAddCandidateToDb = useCallback(async (data) => {
     try {
       setLoading(true);
-      await addCandidateInDB(data);
+      const uuid = await addCandidateInDB(data);
       toast("Candidate was added successfully");
-      navigate(`/show-qr/${data.id}`);
+      navigate(`/show-qr/${uuid}`);
     } catch (e) {
       toast(e.message);
     } finally {
@@ -54,16 +54,16 @@ export default function AddCandidate() {
   }, []);
 
   const submitForm = (data) => {
-    data = {
-      ...data,
-      id: data.rollNumber,
-    };
     console.log(data);
     handleAddCandidateToDb(data);
   };
 
   return (
-    <div className="container m-auto flex flex-col justify-center items-center py-8 px-5">
+    <div
+      className={`container m-auto flex flex-col justify-center items-center py-8 px-5 ${
+        loading && "pointer-events-none opacity-60"
+      }`}
+    >
       <ToastContainer />
       <form
         className="w-full max-w-lg"

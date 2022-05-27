@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Header from "./components/Header";
-import ShowQr from "./components/ShowQr";
+import ShowQr from "./pages/ShowQr";
 import AddCandidate from "./pages/AddCandidate";
 import Error from "./pages/Error";
 import Home from "./pages/Home";
