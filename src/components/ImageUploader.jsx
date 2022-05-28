@@ -24,7 +24,8 @@ export default function ImageUploader({ onChange }) {
       setPicUploading(true);
       const res = await storeCandidateImage(
         candidateImageSrc.file,
-        candidateImageSrc.type
+        candidateImageSrc.type,
+        Date.now()
       );
       setUloadedImageSrc(res);
       setCandidateImageSrc({ url: "", file: null, type: "" });
