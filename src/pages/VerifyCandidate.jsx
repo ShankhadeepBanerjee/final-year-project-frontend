@@ -1,27 +1,26 @@
-import React, {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Webcam from "react-webcam";
 import QrReader from "../components/QrReader";
 import { getCandidateData } from "../utils/firestore";
-import { ImCross, ImSpinner3, ImSpinner9 } from "react-icons/im";
+import { ImCross, ImSpinner3 } from "react-icons/im";
+import { AiFillCheckCircle, AiFillCloseCircle } from "react-icons/ai";
 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FcOldTimeCamera } from "react-icons/fc";
 import { matchTwoFaces } from "../utils/faceAPI-utils";
-import { storeCandidateImage } from "../utils/firebase-storage";
 import * as faceapi from "face-api.js";
+import Modal from "../components/Modal";
 
 export default function VerifyCandidate() {
   const [candidateID, setCandidateID] = useState("");
   const [loading, setLoading] = useState(false);
   const [candidateData, setCandidateData] = useState(null);
   const [candidateImageSrc, setCandidateImageSrc] = useState("");
+  const [result, setResult] = useState("");
+
   const notify = (message) => toast(message);
+
   const handleCandidateDataFetch = useCallback(async () => {
     try {
       if (!candidateID) return;
@@ -39,26 +38,33 @@ export default function VerifyCandidate() {
 
   const matchFaces = useCallback(
     async (one, two) => {
-      if (!candidateImageSrc) return;
+      if (candidateImageSrc === "") return;
       try {
         setLoading(true);
-        matchTwoFaces(one, two);
+        const res = await matchTwoFaces(one, two);
+        console.log(res);
+        if (res === "nofaceOne" || res === "nofaceTwo")
+          throw "No face Found In the Image";
+        else {
+          setResult(res);
+        }
       } catch (e) {
-        notify("ERROR: ", e);
+        notify(e);
       } finally {
         setLoading(false);
+        setCandidateImageSrc("");
+        setCandidateData(null);
       }
     },
     [candidateImageSrc]
   );
 
   useEffect(() => {
+    if (candidateImageSrc === "") return;
     (async () => {
       const one = document.getElementById("imgOnCampus");
       const two = await faceapi.fetchImage(candidateData?.candidateImageURL);
-      console.log(one, two);
-
-      await matchFaces(one, two);
+      matchFaces(one, two);
     })();
   }, [matchFaces]);
 
@@ -69,6 +75,7 @@ export default function VerifyCandidate() {
   return (
     <div className="container m-auto flex flex-col justify-center items-center py-5 min-h-[90vh]">
       <ToastContainer />
+      <div>{result}</div>
       {!candidateID && (
         <>
           <p className="text-lg font-bold">
@@ -107,7 +114,6 @@ export default function VerifyCandidate() {
                     alt="hello"
                     id="imgOnCampus"
                     src={candidateImageSrc}
-                    // crossOrigin="anonymous"
                   />
                   <ImCross
                     className="BaseButton bg-white p-2 absolute bottom-10 left-1/2 -translate-x-1/2 cursor-pointer"
@@ -124,11 +130,6 @@ export default function VerifyCandidate() {
                       size={50}
                       onClick={async () => {
                         let imageSrc = getScreenshot();
-                        // imageSrc = await storeCandidateImage(
-                        //   imageSrc,
-                        //   "data_url",
-                        //   `${candidateID}.jpg`
-                        // );
                         setCandidateImageSrc(imageSrc);
                       }}
                     />
@@ -142,11 +143,39 @@ export default function VerifyCandidate() {
                 alt=""
                 id="imgOnDB"
                 className=" w-full object-cover"
-                // crossOrigin="anonymous"
               />
             </div>
           </div>
         </div>
+      )}
+      {result && (
+        <Modal
+          show={result !== ""}
+          handleClose={() => {
+            setResult("");
+            setCandidateID("");
+          }}
+        >
+          <div className="flex flex-col justify-center items-center text-3xl h-96 w-96 gap-y-5 px-5">
+            {result === "match" ? (
+              <>
+                <p className="flex justify-center text-center">
+                  {"Your Face Matched. You can Proceed."}
+                </p>
+                <div className="flex justify-center">
+                  <AiFillCheckCircle color="green" />
+                </div>
+              </>
+            ) : (
+              <>
+                <p>{"Face Did not Match!!!"}</p>
+                <div>
+                  <AiFillCloseCircle color="red" />
+                </div>
+              </>
+            )}
+          </div>
+        </Modal>
       )}
     </div>
   );

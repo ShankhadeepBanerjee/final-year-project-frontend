@@ -25,19 +25,22 @@ export const getFaceMatcher = async (referenceImage) => {
 export const matchTwoFaces = async (img1, img2) => {
   const matcher = await getFaceMatcher(img1);
   const face2Discriptors = await getFaceDiscriptors(img2);
-  // console.log(matcher, face2Discriptors);
 
   if (matcher && face2Discriptors) {
     const bestMatch = matcher.findBestMatch(face2Discriptors);
-    if (bestMatch.toString().split(" ")[0] === "unknown")
-      console.log("Dowsn't match");
-    else {
-      console.log("Matches", bestMatch.toString());
-      alert("Yes face Matched, You can Proceed");
+    console.log(bestMatch);
+    if (bestMatch.toString().split(" ")[0] === "unknown") {
+      console.log("Not Matched");
+      return "noMatch";
+    } else {
+      console.log("Matched");
+      return "match";
     }
   } else if (!matcher) {
-    alert("nofaces found for One");
+    console.log("No Face For One");
+    return "nofaceOne";
   } else {
-    alert("nofaces found for Two");
+    console.log("No Face For Two");
+    return "nofaceTwo";
   }
 };
