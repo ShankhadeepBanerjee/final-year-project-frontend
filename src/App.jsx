@@ -9,16 +9,19 @@ import VerifyCandidate from "./pages/VerifyCandidate";
 import { createContext, useEffect, useState } from "react";
 import * as faceapi from "face-api.js";
 
+const MODEL_URL = "/models";
+
 export const faceAPIContext = createContext();
 
 function App() {
   const [modelsLoaded, setModelsLoaded] = useState(false);
   useEffect(() => {
     (async () => {
-      const net = new faceapi.SsdMobilenetv1();
-      await faceapi.loadSsdMobilenetv1Model("/models");
-      console.log(faceapi.nets.ssdMobilenetv1);
+      await faceapi.loadSsdMobilenetv1Model(MODEL_URL);
+      await faceapi.loadFaceLandmarkModel(MODEL_URL);
+      await faceapi.loadFaceRecognitionModel(MODEL_URL);
       setModelsLoaded(true);
+      console.log("Models loaded");
     })();
   }, []);
 

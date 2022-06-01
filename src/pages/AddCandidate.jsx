@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useContext } from "react";
+import React, { useState, useCallback } from "react";
 
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -9,13 +9,6 @@ import { addCandidateInDB } from "../utils/firestore";
 import { ToastContainer, toast } from "react-toastify";
 import ImageUploader from "../components/ImageUploader";
 import { useNavigate } from "react-router-dom";
-import * as faceapi from "face-api.js";
-
-import { FcOldTimeCamera } from "react-icons/fc";
-import { AiFillFolderOpen } from "react-icons/ai";
-import { BsFillCameraFill } from "react-icons/bs";
-import { FaUpload, FaWindowClose } from "react-icons/fa";
-import { faceAPIContext } from "../App";
 
 const colleges = ["Others", "ABC college", "DEF college", "GHI college"];
 
@@ -64,37 +57,6 @@ export default function AddCandidate() {
     console.log(data);
     handleAddCandidateToDb(data);
   };
-
-  const modelLoaded = useContext(faceAPIContext);
-
-  const [showModal, setShowModal] = useState(false);
-  const [candidateImageSrc, setCandidateImageSrc] = useState("");
-
-  const uploadRef = useRef(null);
-
-  const candidateImgRef = useRef(null);
-
-  const handleModalClose = () => setShowModal(false);
-
-  useEffect(() => {
-    console.log(candidateImageSrc, modelLoaded);
-    if (!candidateImageSrc || !modelLoaded) return;
-    // (async () => {
-    //   try {
-    //     const input = candidateImgRef.current;
-    //     const detections = await faceapi.detectAllFaces(input);
-    //     const detectionsForSize = faceapi.resizeResults(detections, {
-    //       width: input.width,
-    //       height: input.height,
-    //     });
-    //     console.log(detectionsForSize);
-    //   } catch (e) {
-    //     alert(e.message);
-    //   } finally {
-    //     console.log(candidateImgRef.current);
-    //   }
-    // })();
-  }, [candidateImageSrc, modelLoaded]);
 
   return (
     <div
@@ -204,90 +166,26 @@ export default function AddCandidate() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-y-5 my-10">
-          <label
-            className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-            htmlFor="face-capture"
-          >
-            Candidate Face Picture
-          </label>
-          <input
-            type="text"
-            {...register("candidateFacePicURL")}
-            className="hidden"
-            value={candidateImageSrc}
-          />
-
-          <p className="text-red-500 text-xs italic">
-            {candidateImageSrc === "" && errors?.candidateFacePicURL?.message}
-          </p>
-          <div className="shadow-xl relative">
-            {candidateImageSrc && (
-              <FaWindowClose
-                className="absolute top-0 right-0 BaseButton p-0 rounded-[0]"
-                size={32}
-                color="#f15d"
-                onClick={() => setCandidateImageSrc("")}
-              />
-            )}
-            <img
-              className="rounded-md w-full h-full"
-              src={candidateImageSrc || "images/upload-placeholder.jpg"}
-              alt=""
-              ref={candidateImgRef}
-            />
-          </div>
-          <Modal show={showModal} handleClose={handleModalClose}>
-            <div
-              className={`h-screen w-full md:h-full bg-gray-400 p-2 rounded-md`}
-            >
-              <Webcam className="object-cover w-full h-[90vh] md:h-full">
-                {({ getScreenshot }) => (
-                  <FcOldTimeCamera
-                    className="BaseButton bg-white p-2 absolute bottom-10 left-1/2 -translate-x-1/2 cursor-pointer"
-                    size={50}
-                    onClick={() => {
-                      handleModalClose();
-                      const imageSrc = getScreenshot();
-                      setCandidateImageSrc(imageSrc);
-                    }}
-                  />
-                )}
-              </Webcam>
-            </div>
-          </Modal>
-          <div>
-            <input
-              type="file"
-              className="hidden"
-              ref={uploadRef}
-              onChange={(e) => {
-                const imageURL = URL.createObjectURL(e.target.files[0]);
-                setCandidateImageSrc(imageURL);
-              }}
-            />
-            {candidateImageSrc && (
-              <span className="BaseButton inline-flex items-center gap-x-3 bg-green-500 text-white">
-                <FaUpload />
-                <p>Upload</p>
-              </span>
-            )}
-            <span
-              className="BaseButton inline-flex items-center gap-x-3"
-              onClick={() => console.log(uploadRef.current.click())}
-            >
-              <AiFillFolderOpen size={20} />
-              <span>From Device</span>
-            </span>
-            <span
-              className="BaseButton inline-flex items-center gap-x-3"
-              onClick={() => setShowModal(true)}
-            >
-              <BsFillCameraFill size={20} />
-              <span>Capture Face</span>
-            </span>
-          </div>
-        </div>
+        <Controller
+          control={control}
+          name="candidateImageURL"
+          render={({ field: { value, onChange }, fieldState: { error } }) => {
+            return (
+              <>
+                <label
+                  className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                  htmlFor="face-capture"
+                >
+                  Candidate Face Picture
+                </label>
+                <p className="text-red-500 text-xs italic">
+                  {error && error?.message}
+                </p>
+                <ImageUploader onChange={onChange} />
+              </>
+            );
+          }}
+        />
 
         <input
           type="submit"

@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^2.8.8",
+    "@tensorflow/tfjs-node": "^1.2.9",
     "firebase": "^9.8.1",
     "qrcode-decoder": "^0.2.2",
     "face-api.js": "^0.22.2",
