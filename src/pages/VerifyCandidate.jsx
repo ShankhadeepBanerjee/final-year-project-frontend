@@ -53,6 +53,7 @@ export default function VerifyCandidate() {
       } finally {
         setLoading(false);
         setCandidateImageSrc("");
+        setCandidateID("");
         setCandidateData(null);
       }
     },
@@ -106,11 +107,11 @@ export default function VerifyCandidate() {
           </p>
 
           <div className="flex flex-wrap gap-5 w-full p-3">
-            <div className="relative flex-1 min-w-[24rem]">
+            <div className="relative flex-1 min-w-[24rem] h-96 px-10">
               {candidateImageSrc ? (
-                <div className="min-h-[5rem]">
+                <div className="h-full">
                   <img
-                    className="w-full"
+                    className="w-full h-full object-cover"
                     alt="hello"
                     id="imgOnCampus"
                     src={candidateImageSrc}
@@ -123,7 +124,7 @@ export default function VerifyCandidate() {
                   />
                 </div>
               ) : (
-                <Webcam className="object-cover w-full px-5">
+                <Webcam className="object-cover w-full px-5 h-full">
                   {({ getScreenshot }) => (
                     <FcOldTimeCamera
                       className="BaseButton bg-white p-2 absolute bottom-10 left-1/2 -translate-x-1/2 cursor-pointer"
@@ -137,12 +138,12 @@ export default function VerifyCandidate() {
                 </Webcam>
               )}
             </div>
-            <div className="flex-1 flex justify-center items-center min-w-[24rem]">
+            <div className="flex-1 flex justify-center items-center min-w-[24rem] h-96 px-10">
               <img
                 src={candidateData.candidateImageURL}
                 alt=""
                 id="imgOnDB"
-                className=" w-full object-cover"
+                className=" w-full object-cover h-full"
               />
             </div>
           </div>
@@ -153,7 +154,6 @@ export default function VerifyCandidate() {
           show={result !== ""}
           handleClose={() => {
             setResult("");
-            setCandidateID("");
           }}
         >
           <div className="flex flex-col justify-center items-center text-3xl h-96 w-96 gap-y-5 px-5">
